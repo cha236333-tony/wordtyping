@@ -92,6 +92,17 @@ const WordMode = (() => {
     const progressEl = document.getElementById('progress-container');
     if (progressEl) progressEl.style.display = 'flex';
 
+    // 레이아웃 초기화
+    const gameMain = document.querySelector('.game-main');
+    if (gameMain) gameMain.style.justifyContent = 'center';
+    const wordCard = document.querySelector('.word-card');
+    if (wordCard) wordCard.style.display = 'block';
+    const inputArea = document.querySelector('.input-area');
+    if (inputArea) {
+      inputArea.style.zIndex = '';
+      inputArea.style.marginBottom = '';
+    }
+
     updateScore(0);
     updateProgressBar(0, state.totalWords);
     updateTimer(state.timeLimit);
@@ -200,36 +211,34 @@ const WordMode = (() => {
     const wordObj = state.words[state.currentIndex];
     if (!wordObj) return;
 
-    const trimmed = value.trim();
+    const trimmed = value.trim().normalize('NFC');
+    const target = (state.isTimesTable ? wordObj.answer : wordObj.word).normalize('NFC');
 
-    if (state.isTimesTable) {
-      // 구구단: 정답이 숫자이므로 길이 일치 시 자동 제출
-      const answer = wordObj.answer || '';
-      if (trimmed.length >= answer.length && trimmed.length > 0) {
-        submitAnswer(trimmed);
-      }
-    } else {
-      // 일반 단어: 글자 수 일치 시 자동 제출
-      const targetWord = wordObj.word || '';
-      if (trimmed.length >= targetWord.length && !state.isComposing) {
-        submitAnswer(trimmed);
-      }
+    // 정확히 일치할 때만 자동 제출 (오답 자동 처리 방지)
+    if (trimmed === target) {
+      submitAnswer(trimmed);
     }
   }
 
   // ── 정답 처리 ─────────────────────────────
 
+  let lastSubmitTime = 0;
+
   function submitAnswer(input) {
     if (!state.isActive) return;
+    
+    // 중복 제출 방지 (0.2초)
+    const now = Date.now();
+    if (now - lastSubmitTime < 200) return;
+    lastSubmitTime = now;
+
     const wordObj = state.words[state.currentIndex];
     if (!wordObj) return;
 
-    const trimmed = input.trim();
-    const correct = state.isTimesTable
-      ? trimmed === wordObj.answer
-      : trimmed === wordObj.word;
-
-    if (correct) {
+    const trimmed = input.trim().normalize('NFC');
+    const target = (state.isTimesTable ? wordObj.answer : wordObj.word).normalize('NFC');
+    
+    if (trimmed === target) {
       onCorrect(wordObj);
     } else {
       onWrong(wordObj);

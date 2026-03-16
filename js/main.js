@@ -52,18 +52,18 @@ function showMainMenu(subject) {
   const descEl = document.getElementById('main-desc');
   if (descEl) descEl.textContent = info.description;
 
-  // 구구단이면 문장 연습 버튼 숨기기
+  // 문장 연습 버튼 제거 (항상 숨김)
   const sentenceBtn = document.getElementById('btn-sentence-mode');
   if (sentenceBtn) {
-    sentenceBtn.style.display = info.isTimesTable ? 'none' : 'flex';
+    sentenceBtn.style.display = 'none';
   }
 
-  // 구구단이면 단어 버튼 텍스트 변경
+  // 게임 이름 변경 반영
   const wordBtn = document.getElementById('btn-word-mode');
   if (wordBtn) {
     const wordBtnLabel = wordBtn.querySelector('.btn-label');
     if (wordBtnLabel) {
-      wordBtnLabel.textContent = info.isTimesTable ? '구구단 연습' : '단어 연습';
+      wordBtnLabel.textContent = info.isTimesTable ? '구구단 연습' : '연습 모드';
     }
     const wordBtnEmoji = wordBtn.querySelector('.btn-emoji');
     if (wordBtnEmoji) {
@@ -76,7 +76,7 @@ function showMainMenu(subject) {
   if (arcadeBtn) {
     const arcadeBtnLabel = arcadeBtn.querySelector('.btn-label');
     if (arcadeBtnLabel) {
-      arcadeBtnLabel.textContent = info.isTimesTable ? '구구단 게임' : '받아쓰기 게임';
+      arcadeBtnLabel.textContent = info.isTimesTable ? '구구단 게임' : '게임 모드';
     }
   }
 
@@ -95,13 +95,7 @@ function bindMainMenuEvents() {
     });
   }
 
-  const sentenceBtn = document.getElementById('btn-sentence-mode');
-  if (sentenceBtn) {
-    sentenceBtn.addEventListener('click', () => {
-      AppState.currentMode = 'sentence';
-      showLevelSelect('sentence');
-    });
-  }
+  // 문장 연습 버튼은 UI에서 이미 제거됨
 
   const arcadeBtn = document.getElementById('btn-arcade-mode');
   if (arcadeBtn) {
@@ -130,6 +124,8 @@ function showLevelSelect(mode) {
     let label = modeInfo?.name || '';
     if (AppState.currentSubject === 'times_table') {
       label = mode === 'word' ? '구구단 연습' : '구구단 게임';
+    } else {
+      label = mode === 'word' ? '연습 모드' : '게임 모드';
     }
     modeTitle.textContent = `${subjectInfo?.emoji || ''} ${label}`;
   }
@@ -272,19 +268,34 @@ function bindBackButtons() {
   // ESC 키: 게임 화면 → 메인 메뉴
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      const gameScreen = document.getElementById('game-screen');
-      if (gameScreen && !gameScreen.classList.contains('hidden')) {
-        if (confirm('게임을 종료하고 메뉴로 돌아갈까요?')) {
-          if (AppState.activeMode) {
-            AppState.activeMode.stop();
-            AppState.activeMode = null;
-          }
-          updateMainMenuHighScore();
-          showScreen('main-menu');
-        }
-      }
+      handleExitGame();
     }
   });
+
+  // 나가기 버튼: 게임 화면 → 메인 메뉴
+  const exitBtn = document.getElementById('btn-exit-game');
+  if (exitBtn) {
+    exitBtn.addEventListener('click', () => {
+      handleExitGame();
+    });
+  }
+}
+
+/**
+ * 게임 종료 및 메인 메뉴로 이동 공통 처리
+ */
+function handleExitGame() {
+  const gameScreen = document.getElementById('game-screen');
+  if (gameScreen && !gameScreen.classList.contains('hidden')) {
+    if (confirm('게임을 종료하고 메뉴로 돌아갈까요?')) {
+      if (AppState.activeMode) {
+        AppState.activeMode.stop();
+        AppState.activeMode = null;
+      }
+      updateMainMenuHighScore();
+      showScreen('main-menu');
+    }
+  }
 }
 
 // ── 구름 애니메이션 ───────────────────────────

@@ -73,9 +73,10 @@ const ArcadeMode = (() => {
     const levelInfo = LEVEL_INFO[state.level];
     state.timeLimit = levelInfo ? levelInfo.timeLimit : 180;
 
-    // 속도 슬라이더 값 읽기
+    // 속도 슬라이더를 최하위(min)로 초기화
     const slider = document.getElementById('speed-slider');
-    state.speedMultiplier = slider ? parseFloat(slider.value) : 1.0;
+    if (slider) slider.value = slider.min;
+    state.speedMultiplier = slider ? parseFloat(slider.value) : 0.3;
 
     showScreen('game-screen');
     setupArcadeUI();
@@ -102,7 +103,7 @@ const ArcadeMode = (() => {
     const subjectInfo = SUBJECT_INFO[AppState.currentSubject] || {};
 
     const modeLabel = document.getElementById('game-mode-label');
-    if (modeLabel) modeLabel.textContent = state.isTimesTable ? '구구단 게임 🎈' : '받아쓰기 게임 🎈';
+    if (modeLabel) modeLabel.textContent = state.isTimesTable ? '구구단 게임 🎈' : '게임 모드 🎈';
 
     const levelLabel = document.getElementById('game-level-label');
     if (levelLabel) {
@@ -120,11 +121,19 @@ const ArcadeMode = (() => {
     if (livesEl) livesEl.style.display = 'flex';
     updateLivesDisplay(state.lives);
 
-    // 단어/문장 표시 숨기기
-    ['word-emoji', 'word-display', 'sentence-display'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = 'none';
-    });
+    // 단어 카드 숨기기 및 입력 영역 배치 조정
+    const wordCard = document.querySelector('.word-card');
+    if (wordCard) wordCard.style.display = 'none';
+
+    const gameMain = document.querySelector('.game-main');
+    if (gameMain) gameMain.style.justifyContent = 'flex-end';
+
+    const inputArea = document.querySelector('.input-area');
+    if (inputArea) {
+      inputArea.style.display = 'flex';
+      inputArea.style.zIndex = '100';
+      inputArea.style.marginBottom = '20px';
+    }
 
     // 아케이드 영역 표시
     const arcadeArea = document.getElementById('arcade-area');
@@ -330,10 +339,11 @@ const ArcadeMode = (() => {
       }
     });
 
-    inp.addEventListener('input', (e) => {
-      if (!state.isActive) return;
-      highlightMatchingBalloon(e.target.value.trim());
-    });
+    // 실시간 하이라이트 기능 제거 (사용자 요청)
+    // inp.addEventListener('input', (e) => {
+    //   if (!state.isActive) return;
+    //   highlightMatchingBalloon(e.target.value.trim());
+    // });
   }
 
   function checkWordMatch(input) {
@@ -553,6 +563,16 @@ const ArcadeMode = (() => {
     const speedControl = document.getElementById('speed-control');
     if (speedControl) speedControl.style.display = 'none';
 
+    const gameMain = document.querySelector('.game-main');
+    if (gameMain) gameMain.style.justifyContent = 'center';
+    const wordCard = document.querySelector('.word-card');
+    if (wordCard) wordCard.style.display = 'block';
+    const inputArea = document.querySelector('.input-area');
+    if (inputArea) {
+      inputArea.style.zIndex = '';
+      inputArea.style.marginBottom = '';
+    }
+
     showResult({
       score: finalScore, wpm, accuracy,
       correct: state.correctCount, wrong: state.wrongCount,
@@ -571,12 +591,23 @@ const ArcadeMode = (() => {
     state.isActive = false;
     stopTimer(); stopSpawn(); stopGameLoop();
     clearArcadeArea();
+    
     const arcadeArea = document.getElementById('arcade-area');
     if (arcadeArea) arcadeArea.style.display = 'none';
     const progressEl = document.getElementById('progress-container');
     if (progressEl) progressEl.style.display = 'flex';
     const speedControl = document.getElementById('speed-control');
     if (speedControl) speedControl.style.display = 'none';
+
+    const gameMain = document.querySelector('.game-main');
+    if (gameMain) gameMain.style.justifyContent = 'center';
+    const wordCard = document.querySelector('.word-card');
+    if (wordCard) wordCard.style.display = 'block';
+    const inputArea = document.querySelector('.input-area');
+    if (inputArea) {
+      inputArea.style.zIndex = '';
+      inputArea.style.marginBottom = '';
+    }
   }
 
   return { start, stop };

@@ -348,7 +348,7 @@ const SUBJECT_INFO = {
   korean: {
     name: "한국어",
     emoji: "🇰🇷",
-    description: "한글 단어와 문장을 연습해요!",
+    description: "한글 단어를 연습해요!",
     color: "#FF7043",
     data: KOREAN_DATA,
     isTimesTable: false
@@ -356,7 +356,7 @@ const SUBJECT_INFO = {
   english: {
     name: "영어",
     emoji: "🇺🇸",
-    description: "English words and sentences!",
+    description: "Learn English words!",
     color: "#42A5F5",
     data: ENGLISH_DATA,
     isTimesTable: false
@@ -421,7 +421,7 @@ const LEVEL_INFO = {
 // ── 모드 정보 ─────────────────────────────────
 const MODE_INFO = {
   word: {
-    name: "단어 연습",
+    name: "연습 모드",
     emoji: "✏️",
     description: "단어를 보고 따라 써요!"
   },
@@ -431,9 +431,9 @@ const MODE_INFO = {
     description: "문장을 보고 따라 써요!"
   },
   arcade: {
-    name: "받아쓰기 게임",
+    name: "게임 모드",
     emoji: "🎮",
-    description: "떨어지는 단어를 잡아요!"
+    description: "떨어지는 단어를 잡아라!"
   }
 };
 
