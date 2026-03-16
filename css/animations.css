@@ -1,0 +1,275 @@
+/* =============================================
+   css/animations.css - 애니메이션 효과
+   ============================================= */
+
+/* ── balloon-sway: 풍선 좌우 흔들림 ─────────── */
+@keyframes balloon-sway {
+  0%, 100% { transform: rotate(-3deg) translateX(0); }
+  25%       { transform: rotate(2deg) translateX(3px); }
+  75%       { transform: rotate(-2deg) translateX(-3px); }
+}
+
+/* ── balloon-rise: 풍선 등장 ─────────────────── */
+@keyframes balloon-rise {
+  0%   { transform: scale(0) translateY(20px); opacity: 0; }
+  60%  { transform: scale(1.1) translateY(-5px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* ── cannon-fire: 대포 발사 반동 ─────────────── */
+@keyframes cannon-fire {
+  0%   { transform: translateX(-50%) scale(1); }
+  20%  { transform: translateX(calc(-50% - 8px)) scale(0.95); }
+  60%  { transform: translateX(calc(-50% + 4px)) scale(1.02); }
+  100% { transform: translateX(-50%) scale(1); }
+}
+
+/* ── pop-burst: 풍선 터지기 ──────────────────── */
+@keyframes pop-burst {
+  0%   { transform: scale(1); opacity: 1; filter: brightness(1); }
+  30%  { transform: scale(1.5); opacity: 0.8; filter: brightness(2); }
+  60%  { transform: scale(2); opacity: 0.4; filter: brightness(1.5); }
+  100% { transform: scale(0.1); opacity: 0; }
+}
+
+
+/* ── wiggle: 버튼 호버 좌우 흔들림 ─────────── */
+@keyframes wiggle {
+  0%   { transform: rotate(0deg); }
+  15%  { transform: rotate(-6deg); }
+  30%  { transform: rotate(6deg); }
+  45%  { transform: rotate(-4deg); }
+  60%  { transform: rotate(4deg); }
+  75%  { transform: rotate(-2deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* ── bounce-in: 단어 등장 튀어오르기 ────────── */
+@keyframes bounce-in {
+  0%   { transform: scale(0.3); opacity: 0; }
+  50%  { transform: scale(1.1); opacity: 1; }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+/* ── shake: 오답 피드백 흔들림 ──────────────── */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%       { transform: translateX(-10px); }
+  20%       { transform: translateX(10px); }
+  30%       { transform: translateX(-10px); }
+  40%       { transform: translateX(10px); }
+  50%       { transform: translateX(-8px); }
+  60%       { transform: translateX(8px); }
+  70%       { transform: translateX(-5px); }
+  80%       { transform: translateX(5px); }
+  90%       { transform: translateX(-2px); }
+}
+
+/* ── pop: 정답 피드백 커졌다 작아짐 ─────────── */
+@keyframes pop {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.25); }
+  60%  { transform: scale(0.92); }
+  80%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* ── float: 배경 구름 천천히 이동 ───────────── */
+@keyframes float {
+  0%   { transform: translateX(-150px); }
+  100% { transform: translateX(calc(100vw + 150px)); }
+}
+
+/* ── float-y: 위아래 둥실 ───────────────────── */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
+}
+
+/* ── fall: 아케이드 단어 낙하 (CSS fallback) ── */
+@keyframes fall {
+  0%   { top: -80px; opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 100%; opacity: 0.5; }
+}
+
+/* ── explode: 아케이드 정답 폭발 ────────────── */
+@keyframes explode {
+  0%   { transform: scale(1); opacity: 1; }
+  50%  { transform: scale(1.8); opacity: 0.6; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+/* ── slide-in: 화면 전환 슬라이드 ───────────── */
+@keyframes slide-in {
+  0%   { transform: translateY(30px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* ── blink: 커서 깜빡임 ─────────────────────── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ── pulse: 타이머 경고 깜빡임 ──────────────── */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); color: #F44336; }
+  50%       { transform: scale(1.15); color: #FF1744; }
+}
+
+/* ── star-burst: 결과 화면 별 터지기 ────────── */
+@keyframes star-burst {
+  0%   { transform: scale(0) rotate(0deg); opacity: 0; }
+  60%  { transform: scale(1.3) rotate(20deg); opacity: 1; }
+  80%  { transform: scale(0.9) rotate(-5deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* ── heart-beat: 목숨 감소 ──────────────────── */
+@keyframes heart-beat {
+  0%   { transform: scale(1); }
+  14%  { transform: scale(1.3); }
+  28%  { transform: scale(1); }
+  42%  { transform: scale(1.3); }
+  70%  { transform: scale(1); }
+}
+
+/* ── tada: 신기록 배너 ───────────────────────── */
+@keyframes tada {
+  0%   { transform: scale(1); }
+  10%  { transform: scale(0.9) rotate(-3deg); }
+  20%  { transform: scale(0.9) rotate(-3deg); }
+  30%  { transform: scale(1.1) rotate(3deg); }
+  40%  { transform: scale(1.1) rotate(-3deg); }
+  50%  { transform: scale(1.1) rotate(3deg); }
+  60%  { transform: scale(1.1) rotate(-3deg); }
+  70%  { transform: scale(1.1) rotate(3deg); }
+  80%  { transform: scale(1.1) rotate(-3deg); }
+  90%  { transform: scale(1.1) rotate(3deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+/* ── rainbow: 콤보 텍스트 무지개 ────────────── */
+@keyframes rainbow {
+  0%   { color: #FF6B6B; }
+  16%  { color: #FFD93D; }
+  33%  { color: #6BCB77; }
+  50%  { color: #4D96FF; }
+  66%  { color: #C77DFF; }
+  83%  { color: #FF9F43; }
+  100% { color: #FF6B6B; }
+}
+
+/* ── spin: 로딩 스피너 ───────────────────────── */
+@keyframes spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ── fade-in: 부드러운 등장 ─────────────────── */
+@keyframes fade-in {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* ── zoom-in: 확대 등장 ─────────────────────── */
+@keyframes zoom-in {
+  0%   { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ── missed-flash: 놓친 단어 빨간 깜빡임 ─────── */
+@keyframes missed-flash {
+  0%, 100% { background: rgba(244, 67, 54, 0.2); }
+  50%       { background: rgba(244, 67, 54, 0.6); }
+}
+
+/* =============================================
+   애니메이션 클래스 적용
+   ============================================= */
+
+.wiggle:hover {
+  animation: wiggle 0.4s ease;
+}
+
+.bounce-in {
+  animation: bounce-in 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+.shake {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+.pop {
+  animation: pop 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+.slide-in {
+  animation: slide-in 0.35s ease-out;
+}
+
+.float-y {
+  animation: float-y 3s ease-in-out infinite;
+}
+
+.timer-warning {
+  animation: pulse 0.6s ease-in-out infinite;
+}
+
+.star.filled {
+  animation: star-burst 0.5s ease-out forwards;
+}
+
+.new-record-anim {
+  animation: tada 1s ease-in-out;
+}
+
+.combo-rainbow {
+  animation: rainbow 1s linear infinite;
+}
+
+/* 낙하 단어 */
+.falling-word {
+  animation: float-y 2s ease-in-out infinite;
+}
+
+.falling-word.highlighted {
+  animation: none;
+}
+
+.falling-word.exploding {
+  animation: explode 0.3s ease-out forwards !important;
+}
+
+.falling-word.missed {
+  animation: missed-flash 0.4s ease-in-out 2 !important;
+}
+
+/* 마스코트 캐릭터 */
+.mascot {
+  animation: float-y 2.5s ease-in-out infinite;
+}
+
+/* 결과 화면 카드 */
+.result-card {
+  animation: zoom-in 0.4s ease-out;
+}
+
+/* 피드백 메시지 */
+.feedback-message {
+  transition: opacity 0.3s ease;
+}
+
+/* 커서 글자 깜빡임 */
+.char.cursor::after {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: #1976D2;
+  margin-left: 1px;
+  vertical-align: middle;
+  animation: blink 0.8s step-end infinite;
+}

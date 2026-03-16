@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="초등학생을 위한 한국어·영어·구구단 타자 게임" />
+  <title>🌟 타자왕 - 한국어·영어·구구단</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+</head>
+<body>
+
+<!-- 구름 배경 -->
+<div class="cloud-container" id="cloud-container-bg"></div>
+
+<!-- 파티클 컨테이너 -->
+<div id="particle-container"></div>
+
+<!-- 앱 루트 -->
+<div id="app">
+
+  <!-- ══════════════════════════════════════════
+       1. 과목 선택 화면
+       ══════════════════════════════════════════ -->
+  <div id="subject-select" class="screen">
+    <div class="cloud-container cloud-container--local"></div>
+
+    <div class="mascot-area" style="margin-bottom:8px;">🌟</div>
+
+    <h1 class="subject-title">타자왕</h1>
+    <p class="subject-subtitle">무엇을 연습할까요?</p>
+
+    <div class="subject-grid">
+      <!-- 한국어 -->
+      <button id="btn-subject-korean" class="subject-card korean">
+        <span class="subject-emoji">🇰🇷</span>
+        <span class="subject-name">한국어</span>
+        <span class="subject-desc">한글 단어·문장 연습</span>
+      </button>
+
+      <!-- 영어 -->
+      <button id="btn-subject-english" class="subject-card english">
+        <span class="subject-emoji">🇺🇸</span>
+        <span class="subject-name">영어</span>
+        <span class="subject-desc">English words &amp; sentences</span>
+      </button>
+
+      <!-- 구구단 -->
+      <button id="btn-subject-times_table" class="subject-card times">
+        <span class="subject-emoji">🔢</span>
+        <span class="subject-name">구구단</span>
+        <span class="subject-desc">곱셈 구구단 마스터</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       2. 메인 메뉴 화면
+       ══════════════════════════════════════════ -->
+  <div id="main-menu" class="screen hidden">
+    <div class="cloud-container cloud-container--local"></div>
+
+    <!-- 뒤로가기 -->
+    <button id="btn-back-from-main" class="back-btn">← 과목 선택</button>
+
+    <!-- 마스코트 -->
+    <div class="mascot-area mascot">🦸</div>
+
+    <!-- 제목 -->
+    <h1 id="main-title" class="main-title">🇰🇷 한국어 타자왕</h1>
+    <p id="main-desc" class="main-desc">한글 단어와 문장을 연습해요!</p>
+
+    <!-- 모드 버튼 -->
+    <div class="mode-buttons">
+      <!-- 단어 연습 -->
+      <button id="btn-word-mode" class="btn btn-orange mode-btn wiggle">
+        <span class="btn-emoji">✏️</span>
+        <span class="btn-label">단어 연습</span>
+        <span class="btn-desc">→</span>
+      </button>
+
+      <!-- 문장 연습 -->
+      <button id="btn-sentence-mode" class="btn btn-green mode-btn wiggle">
+        <span class="btn-emoji">📖</span>
+        <span class="btn-label">문장 연습</span>
+        <span class="btn-desc">→</span>
+      </button>
+
+      <!-- 받아쓰기 게임 -->
+      <button id="btn-arcade-mode" class="btn btn-blue mode-btn wiggle">
+        <span class="btn-emoji">🎮</span>
+        <span class="btn-label">받아쓰기 게임</span>
+        <span class="btn-desc">→</span>
+      </button>
+    </div>
+
+    <!-- 하단 정보 -->
+    <div class="main-footer">
+      <div class="highscore-badge">
+        🏆 최고 점수: <span id="main-highscore">없음</span>
+      </div>
+      <button id="btn-change-subject" class="btn btn-gray btn-sm">
+        🔄 과목 변경
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       3. 레벨 선택 화면
+       ══════════════════════════════════════════ -->
+  <div id="level-select" class="screen hidden">
+    <div class="cloud-container cloud-container--local"></div>
+
+    <!-- 뒤로가기 -->
+    <button id="btn-back-from-level" class="back-btn">← 메뉴</button>
+
+    <h2 class="level-title">⭐ 단계를 선택하세요!</h2>
+    <p id="level-select-mode-title" class="level-mode-label">✏️ 단어 연습</p>
+
+    <div class="level-grid">
+      <!-- 쉬움 -->
+      <button id="btn-level-easy" class="level-card easy">
+        <span class="level-emoji">🐣</span>
+        <span class="level-name">쉬움</span>
+        <span id="level-desc-easy" class="level-desc">1~2학년</span>
+        <span id="hs-easy" class="level-highscore">도전해봐요!</span>
+      </button>
+
+      <!-- 보통 -->
+      <button id="btn-level-medium" class="level-card medium">
+        <span class="level-emoji">🐥</span>
+        <span class="level-name">보통</span>
+        <span id="level-desc-medium" class="level-desc">3~4학년</span>
+        <span id="hs-medium" class="level-highscore">도전해봐요!</span>
+      </button>
+
+      <!-- 어려움 -->
+      <button id="btn-level-hard" class="level-card hard">
+        <span class="level-emoji">🐓</span>
+        <span class="level-name">어려움</span>
+        <span id="level-desc-hard" class="level-desc">5~6학년</span>
+        <span id="hs-hard" class="level-highscore">도전해봐요!</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       4. 게임 화면
+       ══════════════════════════════════════════ -->
+  <div id="game-screen" class="screen hidden">
+
+    <!-- 상단 정보 바 -->
+    <header class="game-header">
+      <div class="game-header-left">
+        <!-- 과목 배지 -->
+        <span id="game-subject-badge" class="subject-badge">🇰🇷 한국어</span>
+        <!-- 모드 -->
+        <span id="game-mode-label" class="mode-badge">단어 연습</span>
+        <!-- 레벨 -->
+        <span id="game-level-label" class="level-badge">🐣 쉬움</span>
+      </div>
+
+      <div class="game-header-right">
+        <!-- 목숨 (아케이드 전용) -->
+        <div id="lives-display" style="display:none;"></div>
+
+        <!-- 타이머 -->
+        <div class="stat-item">
+          ⏱️ <span id="timer-display">03:00</span>
+        </div>
+
+        <!-- 점수 -->
+        <div class="stat-item">
+          🏆 <span id="score-display">0</span>
+        </div>
+
+        <!-- WPM -->
+        <div class="stat-item">
+          <span class="stat-label">WPM</span>
+          <span id="wpm-display">0</span>
+        </div>
+
+        <!-- 정확도 -->
+        <div class="stat-item">
+          <span id="accuracy-display">100%</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 진행 바 -->
+    <div id="progress-container">
+      <div class="progress-track">
+        <div id="progress-bar"></div>
+      </div>
+      <span id="progress-text">0 / 20</span>
+    </div>
+
+    <!-- 속도 조절 슬라이더 (아케이드 전용) -->
+    <div id="speed-control" style="display:none;">
+      <div class="speed-control-inner">
+        <span class="speed-icon">🐢</span>
+        <input type="range" id="speed-slider" min="0.3" max="2.0" step="0.1" value="1.0" />
+        <span class="speed-icon">🐇</span>
+        <span id="speed-label" class="speed-label">속도: 100%</span>
+      </div>
+    </div>
+
+    <!-- 게임 메인 영역 -->
+    <main class="game-main">
+
+      <!-- 아케이드 낙하 영역 -->
+      <div id="arcade-area"></div>
+
+      <!-- 콤보 표시 -->
+      <div id="combo-display">🔥 0 콤보!</div>
+
+      <!-- 단어 카드 (단어 모드 / 구구단) -->
+      <div class="word-card">
+        <span id="word-emoji">🍎</span>
+        <div id="word-display">사과</div>
+
+        <!-- 문장 표시 (문장 모드) -->
+        <div id="sentence-display"></div>
+      </div>
+
+      <!-- 입력 영역 -->
+      <div class="input-area">
+        <input
+          type="text"
+          id="typing-input"
+          placeholder="여기에 입력하세요"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          inputmode="text"
+        />
+        <span class="input-hint">Enter 키로 제출 · ESC로 메뉴</span>
+      </div>
+
+      <!-- 피드백 메시지 -->
+      <div id="feedback-message" class="feedback-message" style="display:none;"></div>
+
+    </main>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       5. 결과 화면
+       ══════════════════════════════════════════ -->
+  <div id="result-screen" class="screen hidden">
+    <div class="cloud-container cloud-container--local"></div>
+
+    <h2 class="result-title">🎉 수고했어요! 🎉</h2>
+
+    <!-- 별점 -->
+    <div class="stars-container" id="result-stars">
+      <span class="star filled">⭐</span>
+      <span class="star filled">⭐</span>
+      <span class="star filled">⭐</span>
+    </div>
+
+    <!-- 신기록 배너 -->
+    <div id="new-record-banner">🏆 새 최고 기록 달성!</div>
+
+    <!-- 결과 카드 -->
+    <div class="result-card">
+      <h3>📊 이번 결과</h3>
+      <div class="result-stats">
+        <!-- 총 점수 (전체 너비) -->
+        <div class="stat-row score-row">
+          <span class="stat-label">총 점수</span>
+          <span class="stat-value" id="result-score">0점</span>
+        </div>
+
+        <!-- WPM -->
+        <div class="stat-row">
+          <span class="stat-label">⚡ WPM</span>
+          <span class="stat-value" id="result-wpm">0</span>
+        </div>
+
+        <!-- 정확도 -->
+        <div class="stat-row">
+          <span class="stat-label">🎯 정확도</span>
+          <span class="stat-value" id="result-accuracy">0%</span>
+        </div>
+
+        <!-- 맞은 수 -->
+        <div class="stat-row">
+          <span class="stat-label">✅ 맞은 수</span>
+          <span class="stat-value" id="result-correct">0</span>
+        </div>
+
+        <!-- 틀린 수 -->
+        <div class="stat-row">
+          <span class="stat-label">❌ 틀린 수</span>
+          <span class="stat-value" id="result-wrong">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 최고 점수 -->
+    <p class="highscore-row">
+      🏅 이 레벨 최고 점수: <span id="result-highscore">0점</span>
+    </p>
+
+    <!-- 버튼 -->
+    <div class="result-buttons">
+      <button id="btn-retry" class="btn btn-orange">
+        🔄 다시 도전
+      </button>
+      <button id="btn-next-level" class="btn btn-green">
+        ⬆️ 다음 레벨
+      </button>
+      <button id="btn-to-menu" class="btn btn-gray">
+        🏠 메뉴로
+      </button>
+    </div>
+  </div>
+
+</div><!-- /#app -->
+
+<!-- ── JavaScript (순서 중요) ─────────────────── -->
+<script src="js/data.js"></script>
+<script src="js/score.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/wordMode.js"></script>
+<script src="js/sentenceMode.js"></script>
+<script src="js/arcadeMode.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
