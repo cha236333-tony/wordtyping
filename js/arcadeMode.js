@@ -27,47 +27,51 @@ const ArcadeMode = (() => {
     wordIdCounter: 0,
     isComposing: false,
     isTimesTable: false,
-    speedMultiplier: 1.0,   // 속도 배율 (슬라이더로 조절)
+    speedMultiplier: 0.24,  // 속도 배율 (기존 0.2에서 20% 상향)
     cannonAngle: 0,         // 대포 각도 (애니메이션용)
-    lastFiredId: null       // 마지막으로 맞춘 단어 ID
+    lastFiredId: null,      // 마지막으로 맞춘 단어 ID
+    isPaused: false         // 일시정지 상태
   };
 
   // 풍선/열기구 이모지 목록
-  const BALLOON_EMOJIS = ['🎈', '🎈', '🎈', '🎉', '🎊'];
-  const AIRSHIP_EMOJIS = ['🎈', '🛸', '🪂', '🎊', '🎉'];
-  const TARGET_EMOJIS   = ['🎈', '🎈', '🎈', '🎊', '🛸', '🪂', '🎉', '🎈'];
+  const TARGET_EMOJIS = ['🎈', '🪂', '🚁'];
 
   // 레벨별 기본 설정
   const LEVEL_CONFIG = {
-    easy:   { spawnMs: 3200, minSpeed: 0.3, maxSpeed: 0.55, maxWords: 3 },
-    medium: { spawnMs: 2400, minSpeed: 0.5, maxSpeed: 0.85, maxWords: 4 },
-    hard:   { spawnMs: 1800, minSpeed: 0.8, maxSpeed: 1.2,  maxWords: 5 }
+    easy: { spawnMs: 3200, minSpeed: 0.2, maxSpeed: 0.4, maxWords: 3 },
+    medium: { spawnMs: 2400, minSpeed: 0.35, maxSpeed: 0.6, maxWords: 4 },
+    hard: { spawnMs: 1800, minSpeed: 0.55, maxSpeed: 0.85, maxWords: 5 }
   };
 
   // ── 시작 ──────────────────────────────────
 
   function start(level, scoreKey) {
-    state.level      = level    || 'easy';
-    state.scoreKey   = scoreKey || 'korean_arcade';
+    state.level = level || 'easy';
+    state.scoreKey = scoreKey || 'korean_arcade';
+    
+    // 현재 과목 데이터 강제 동기화
+    setSubject(AppState.currentSubject);
+    
     state.isTimesTable = isTimesTableMode();
-    state.wordPool   = getWords(state.level);
-    // BUG3 수정: wordPool이 비어있으면 fallback으로 easy 데이터 사용
+    state.wordPool = getWords(state.level);
+    
+    // BUG3 수정: wordPool이 비어있으면 fallback
     if (!state.wordPool || state.wordPool.length === 0) {
-      state.wordPool = getWords('easy');
+      state.wordPool = getWords('all'); // 구구단이면 전체, 아니면 easy
     }
     state.fallingWords = [];
-    state.lives      = 3;
-    state.score      = 0;
+    state.lives = 3;
+    state.score = 0;
     state.correctCount = 0;
     state.wrongCount = 0;
-    state.combo      = 0;
-    state.maxCombo   = 0;
+    state.combo = 0;
+    state.maxCombo = 0;
     state.totalChars = 0;
     state.elapsedSeconds = 0;
-    state.isActive   = true;
+    state.isActive = true;
     state.wordIdCounter = 0;
     state.lastTimestamp = null;
-    state.lastFiredId   = null;
+    state.lastFiredId = null;
 
     // BUG2 수정: LEVEL_INFO에서 timeLimit 읽기
     const levelInfo = LEVEL_INFO[state.level];
@@ -76,8 +80,9 @@ const ArcadeMode = (() => {
     // 속도 슬라이더를 최하위(min)로 초기화
     const slider = document.getElementById('speed-slider');
     if (slider) slider.value = slider.min;
-    state.speedMultiplier = slider ? parseFloat(slider.value) : 0.3;
+    state.speedMultiplier = slider ? parseFloat(slider.value) : 0.24;
 
+    state.isPaused = false;
     showScreen('game-screen');
     setupArcadeUI();
     setupInputListeners();
@@ -86,13 +91,13 @@ const ArcadeMode = (() => {
 
     startTimer();
 
-    const cfg = LEVEL_CONFIG[state.level];
+    const cfg = LEVEL_CONFIG[state.level] || LEVEL_CONFIG['easy'];
     spawnBalloon();
     state.spawnInterval = setInterval(() => {
-      if (state.isActive && state.fallingWords.length < cfg.maxWords) {
+      if (state.isActive && !state.isPaused && state.fallingWords.length < (cfg.maxWords || 3)) {
         spawnBalloon();
       }
-    }, cfg.spawnMs);
+    }, cfg.spawnMs || 3000);
 
     state.animFrameId = requestAnimationFrame(gameLoop);
   }
@@ -107,8 +112,14 @@ const ArcadeMode = (() => {
 
     const levelLabel = document.getElementById('game-level-label');
     if (levelLabel) {
-      const li = LEVEL_INFO[state.level];
-      levelLabel.textContent = li ? `${li.emoji} ${li.name}` : '';
+      if (state.isTimesTable && !isNaN(state.level)) {
+        levelLabel.textContent = `🔢 ${state.level}단`;
+      } else if (state.isTimesTable && state.level === 'all') {
+        levelLabel.textContent = `🌟 전체`;
+      } else {
+        const li = LEVEL_INFO[state.level];
+        levelLabel.textContent = li ? `${li.emoji} ${li.name}` : '';
+      }
     }
 
     const subjectBadge = document.getElementById('game-subject-badge');
@@ -196,8 +207,17 @@ const ArcadeMode = (() => {
     if (!wordObj) return;
     const id = 'fw_' + (++state.wordIdCounter);
 
-    // X 위치: 5% ~ 80%
-    const xPercent = 5 + Math.random() * 75;
+    // X 위치: 겹치지 않도록 최대 5번 시도
+    let xPercent = 5 + Math.random() * 75;
+    for (let i = 0; i < 5; i++) {
+      const tooClose = state.fallingWords.some(fw => {
+        // 화면 위쪽(y < 150)에 있는 단어들과 X축 거리가 15% 이내면 겹침으로 간주
+        return fw.y < 150 && Math.abs(fw.x - xPercent) < 15;
+      });
+      if (!tooClose) break;
+      xPercent = 5 + Math.random() * 75;
+    }
+
     const baseSpeed = cfg.minSpeed + Math.random() * (cfg.maxSpeed - cfg.minSpeed);
     // BUG1 수정: speedMultiplier는 여기서만 곱함 (updateBalloons에서 중복 적용 제거)
     const speed = baseSpeed * state.speedMultiplier;
@@ -254,6 +274,11 @@ const ArcadeMode = (() => {
 
   function gameLoop(timestamp) {
     if (!state.isActive) return;
+    if (state.isPaused) {
+      state.lastTimestamp = timestamp; // 일시정지 중 시간 흐름 차단
+      state.animFrameId = requestAnimationFrame(gameLoop);
+      return;
+    }
     if (!state.lastTimestamp) state.lastTimestamp = timestamp;
     const delta = timestamp - state.lastTimestamp;
     state.lastTimestamp = timestamp;
@@ -285,7 +310,7 @@ const ArcadeMode = (() => {
 
   function setupSpeedSlider() {
     const slider = document.getElementById('speed-slider');
-    const label  = document.getElementById('speed-label');
+    const label = document.getElementById('speed-label');
     if (!slider) return;
 
     slider.addEventListener('input', () => {
@@ -322,10 +347,18 @@ const ArcadeMode = (() => {
     const inp = document.getElementById('typing-input');
 
     inp.addEventListener('compositionstart', () => { state.isComposing = true; });
-    inp.addEventListener('compositionend',   () => { state.isComposing = false; });
+    inp.addEventListener('compositionend', () => { state.isComposing = false; });
 
     inp.addEventListener('keydown', (e) => {
       if (!state.isActive) return;
+
+      // 스페이스바: 일시정지 토글 (입력창이 비어있을 때만)
+      if (e.key === ' ' && inp.value.trim() === '') {
+        e.preventDefault();
+        togglePause();
+        return;
+      }
+
       if (e.key === 'Enter') {
         e.preventDefault();
         const val = inp.value.trim();
@@ -411,11 +444,7 @@ const ArcadeMode = (() => {
     }
 
     setInputState('correct');
-    if (state.isTimesTable) {
-      showMessage(`🎯 정답! ${fw.question} = ${fw.answer}`, 'correct');
-    } else {
-      showMessage(`🎯 명중! "${fw.word}"`, 'correct');
-    }
+    // showMessage 제거 (사용자 요청)
 
     removeWord(fw.id, true);
     setTimeout(() => setInputState('normal'), 300);
@@ -466,11 +495,11 @@ const ArcadeMode = (() => {
       const area = document.getElementById('arcade-area');
       const cannon = document.getElementById('arcade-cannon');
       if (area && cannon && fw.element) {
-        const areaRect  = area.getBoundingClientRect();
-        const fwRect    = fw.element.getBoundingClientRect();
+        const areaRect = area.getBoundingClientRect();
+        const fwRect = fw.element.getBoundingClientRect();
         const cannonRect = cannon.getBoundingClientRect();
         const dx = (fwRect.left + fwRect.width / 2) - (cannonRect.left + cannonRect.width / 2);
-        const dy = (fwRect.top  + fwRect.height / 2) - (cannonRect.top  + cannonRect.height / 2);
+        const dy = (fwRect.top + fwRect.height / 2) - (cannonRect.top + cannonRect.height / 2);
         const angle = Math.atan2(dy, dx) * (180 / Math.PI);
         barrel.style.transform = `rotate(${angle}deg)`;
       }
@@ -499,7 +528,7 @@ const ArcadeMode = (() => {
       el.className = 'emoji-particle';
       el.textContent = pieces[i % pieces.length];
       const angle = (Math.PI * 2 * i) / 8;
-      const dist  = 50 + Math.random() * 60;
+      const dist = 50 + Math.random() * 60;
       el.style.cssText = `
         position: fixed;
         left: ${x}px; top: ${y}px;
@@ -523,6 +552,7 @@ const ArcadeMode = (() => {
     clearInterval(state.timerInterval);
     state.elapsedSeconds = 0;
     state.timerInterval = setInterval(() => {
+      if (state.isPaused) return; // 일시정지 시 타이머 중지
       state.elapsedSeconds++;
       const remaining = Math.max(0, state.timeLimit - state.elapsedSeconds);
       updateTimer(remaining);
@@ -530,8 +560,27 @@ const ArcadeMode = (() => {
     }, 1000);
   }
 
-  function stopTimer()    { clearInterval(state.timerInterval);  state.timerInterval  = null; }
-  function stopSpawn()    { clearInterval(state.spawnInterval);  state.spawnInterval  = null; }
+  // ── 일시정지 ──────────────────────────────
+
+  function togglePause() {
+    if (!state.isActive) return;
+    state.isPaused = !state.isPaused;
+
+    if (state.isPaused) {
+      showMessage('⏸️ 일시정지 (스페이스로 재시작)', 'info');
+      // 화이트 아웃 효과 등 원하면 추가 가능
+      const area = document.getElementById('arcade-area');
+      if (area) area.style.opacity = '0.5';
+    } else {
+      showMessage('▶️ 게임 재개!', 'correct');
+      const area = document.getElementById('arcade-area');
+      if (area) area.style.opacity = '1';
+      clearAndFocusInput();
+    }
+  }
+
+  function stopTimer() { clearInterval(state.timerInterval); state.timerInterval = null; }
+  function stopSpawn() { clearInterval(state.spawnInterval); state.spawnInterval = null; }
   function stopGameLoop() {
     if (state.animFrameId) { cancelAnimationFrame(state.animFrameId); state.animFrameId = null; }
   }
@@ -544,9 +593,9 @@ const ArcadeMode = (() => {
     stopTimer(); stopSpawn(); stopGameLoop();
     clearArcadeArea();
 
-    const elapsed  = state.elapsedSeconds || 1;
-    const wpm      = calcWPM(state.totalChars, elapsed);
-    const total    = state.correctCount + state.wrongCount;
+    const elapsed = state.elapsedSeconds || 1;
+    const wpm = calcWPM(state.totalChars, elapsed);
+    const total = state.correctCount + state.wrongCount;
     const accuracy = calcAccuracy(state.correctCount, total || 1);
     const finalScore = calculateScore(
       state.correctCount, state.wrongCount, elapsed, state.maxCombo, state.timeLimit
@@ -591,7 +640,7 @@ const ArcadeMode = (() => {
     state.isActive = false;
     stopTimer(); stopSpawn(); stopGameLoop();
     clearArcadeArea();
-    
+
     const arcadeArea = document.getElementById('arcade-area');
     if (arcadeArea) arcadeArea.style.display = 'none';
     const progressEl = document.getElementById('progress-container');

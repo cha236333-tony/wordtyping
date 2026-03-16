@@ -284,13 +284,8 @@ const ENGLISH_DATA = {
 
 // ── 구구단 데이터 ─────────────────────────────
 function generateTimesTableData() {
-  const easy = [];    // 2단, 3단, 4단
-  const medium = [];  // 5단, 6단, 7단
-  const hard = [];    // 8단, 9단
-
-  const easyTables = [2, 3, 4];
-  const mediumTables = [5, 6, 7];
-  const hardTables = [8, 9];
+  const tables = {};
+  const all = [];
 
   const emojis = {
     2: "🐣", 3: "🌸", 4: "🍀",
@@ -298,43 +293,29 @@ function generateTimesTableData() {
     8: "🚀", 9: "👑"
   };
 
-  easyTables.forEach(n => {
+  for (let n = 2; n <= 9; n++) {
+    tables[n] = [];
     for (let i = 1; i <= 9; i++) {
-      easy.push({
+      const item = {
         word: `${n}x${i}=${n * i}`,
         display: `${n} × ${i} = ?`,
         answer: String(n * i),
         emoji: emojis[n],
-        question: `${n} × ${i}`
-      });
+        question: `${n} × ${i}`,
+        table: n
+      };
+      tables[n].push(item);
+      all.push(item);
     }
-  });
+  }
 
-  mediumTables.forEach(n => {
-    for (let i = 1; i <= 9; i++) {
-      medium.push({
-        word: `${n}x${i}=${n * i}`,
-        display: `${n} × ${i} = ?`,
-        answer: String(n * i),
-        emoji: emojis[n],
-        question: `${n} × ${i}`
-      });
-    }
-  });
+  // 기존 레벨 호환성 유지
+  tables.easy = [...tables[2], ...tables[3], ...tables[4]];
+  tables.medium = [...tables[5], ...tables[6], ...tables[7]];
+  tables.hard = [...tables[8], ...tables[9]];
+  tables.all = all;
 
-  hardTables.forEach(n => {
-    for (let i = 1; i <= 9; i++) {
-      hard.push({
-        word: `${n}x${i}=${n * i}`,
-        display: `${n} × ${i} = ?`,
-        answer: String(n * i),
-        emoji: emojis[n],
-        question: `${n} × ${i}`
-      });
-    }
-  });
-
-  return { easy, medium, hard };
+  return tables;
 }
 
 const TIMES_TABLE_DATA = generateTimesTableData();
@@ -457,7 +438,17 @@ function shuffleArray(arr) {
  * @returns {Array}
  */
 function getWords(level) {
-  const pool = GAME_DATA?.word?.[level] || GAME_DATA?.word?.easy || [];
+  // GAME_DATA.word 하위의 키(2~9, 'all', 'easy' 등)를 직접 참조
+  let pool = [];
+  if (GAME_DATA && GAME_DATA.word) {
+    pool = GAME_DATA.word[level] || GAME_DATA.word['easy'] || [];
+  }
+  
+  // 만약 pool이 비어있다면 (예: times_table 모드인데 level이 'easy'인 경우 등) 다시 확인
+  if (pool.length === 0 && currentSubject === 'times_table') {
+    pool = TIMES_TABLE_DATA[level] || TIMES_TABLE_DATA['all'] || [];
+  }
+
   return shuffleArray(pool);
 }
 

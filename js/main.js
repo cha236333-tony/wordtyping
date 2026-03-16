@@ -118,11 +118,15 @@ function bindMainMenuEvents() {
 
 function showLevelSelect(mode) {
   const modeTitle = document.getElementById('level-select-mode-title');
+  const normalGrid = document.getElementById('normal-level-grid');
+  const timesGrid  = document.getElementById('times-table-select-grid');
+  const isTimesTable = AppState.currentSubject === 'times_table';
+
   if (modeTitle) {
     const subjectInfo = SUBJECT_INFO[AppState.currentSubject];
     const modeInfo = MODE_INFO[mode];
     let label = modeInfo?.name || '';
-    if (AppState.currentSubject === 'times_table') {
+    if (isTimesTable) {
       label = mode === 'word' ? '구구단 연습' : '구구단 게임';
     } else {
       label = mode === 'word' ? '연습 모드' : '게임 모드';
@@ -130,27 +134,67 @@ function showLevelSelect(mode) {
     modeTitle.textContent = `${subjectInfo?.emoji || ''} ${label}`;
   }
 
-  // 레벨별 최고 점수 표시
-  ['easy', 'medium', 'hard'].forEach(level => {
-    const scoreKey = `${AppState.currentSubject}_${mode}`;
-    const hs = getHighScore(scoreKey, level);
-    const el = document.getElementById(`hs-${level}`);
-    if (el) {
-      el.textContent = hs.score > 0 ? `최고: ${hs.score.toLocaleString()}점` : '도전해봐요!';
-    }
-
-    // 레벨 카드 설명 업데이트 (구구단)
-    const descEl = document.getElementById(`level-desc-${level}`);
-    if (descEl && AppState.currentSubject === 'times_table') {
-      const descs = { easy: '2단·3단·4단', medium: '5단·6단·7단', hard: '8단·9단' };
-      descEl.textContent = descs[level] || '';
-    } else if (descEl) {
-      const descs = { easy: '1~2학년', medium: '3~4학년', hard: '5~6학년' };
-      descEl.textContent = descs[level] || '';
-    }
-  });
+  if (isTimesTable) {
+    normalGrid?.classList.add('hidden');
+    timesGrid?.classList.remove('hidden');
+    renderTimesTableGrid(mode);
+  } else {
+    normalGrid?.classList.remove('hidden');
+    timesGrid?.classList.add('hidden');
+    
+    // 일반 레벨별 최고 점수 표시
+    ['easy', 'medium', 'hard'].forEach(level => {
+      const scoreKey = `${AppState.currentSubject}_${mode}`;
+      const hs = getHighScore(scoreKey, level);
+      const el = document.getElementById(`hs-${level}`);
+      if (el) {
+        el.textContent = hs.score > 0 ? `최고: ${hs.score.toLocaleString()}점` : '도전해봐요!';
+      }
+      const descEl = document.getElementById(`level-desc-${level}`);
+      if (descEl) {
+        const descs = { easy: '1~2학년', medium: '3~4학년', hard: '5~6학년' };
+        descEl.textContent = descs[level] || '';
+      }
+    });
+  }
 
   showScreen('level-select');
+}
+
+/**
+ * 구구단 선택 그리드 동적 생성
+ */
+function renderTimesTableGrid(mode) {
+  const grid = document.getElementById('times-table-select-grid');
+  if (!grid) return;
+  
+  grid.innerHTML = '';
+  const scoreKey = `times_table_${mode}`;
+  
+  // 2~9단 버튼 생성
+  for (let n = 2; n <= 10; n++) {
+    const isAll = n === 10;
+    const tableValue = isAll ? 'all' : String(n);
+    const tableName  = isAll ? '전체' : `${n}단`;
+    const tableEmoji = isAll ? '🌟' : (TIMES_TABLE_DATA[n]?.[0]?.emoji || '🔢');
+    
+    const hs = getHighScore(scoreKey, tableValue);
+    
+    const btn = document.createElement('button');
+    btn.className = `level-card ${isAll ? 'hard' : 'medium'}`;
+    btn.innerHTML = `
+      <span class="level-emoji">${tableEmoji}</span>
+      <span class="level-name">${tableName}</span>
+      <span class="level-highscore">${hs.score > 0 ? hs.score.toLocaleString() : '도전!'}</span>
+    `;
+    
+    btn.addEventListener('click', () => {
+      AppState.currentLevel = tableValue;
+      startGame(AppState.currentMode, tableValue);
+    });
+    
+    grid.appendChild(btn);
+  }
 }
 
 function bindLevelSelectEvents() {

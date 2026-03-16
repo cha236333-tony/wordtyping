@@ -71,8 +71,14 @@ const WordMode = (() => {
 
     const levelLabel = document.getElementById('game-level-label');
     if (levelLabel) {
-      const li = LEVEL_INFO[state.level];
-      levelLabel.textContent = li ? `${li.emoji} ${li.name}` : '';
+      if (state.isTimesTable && !isNaN(state.level)) {
+        levelLabel.textContent = `🔢 ${state.level}단`;
+      } else if (state.isTimesTable && state.level === 'all') {
+        levelLabel.textContent = `🌟 전체`;
+      } else {
+        const li = LEVEL_INFO[state.level];
+        levelLabel.textContent = li ? `${li.emoji} ${li.name}` : '';
+      }
     }
 
     // 과목 배지

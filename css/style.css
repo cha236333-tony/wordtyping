@@ -118,6 +118,10 @@ body {
   position: relative;
 }
 
+.hidden {
+  display: none !important;
+}
+
 .screen.hidden {
   display: none !important;
 }
@@ -465,6 +469,43 @@ body {
   font-weight: 700;
 }
 
+/* ── 구구단 전용 그리드 보완 (컴팩트) ────────── */
+#times-table-select-grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  max-width: 600px;
+}
+
+#times-table-select-grid .level-card {
+  padding: 12px 8px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+}
+
+#times-table-select-grid .level-card:active {
+  box-shadow: 0 1px 0 rgba(0,0,0,0.1);
+}
+
+#times-table-select-grid .level-emoji {
+  font-size: 1.8rem;
+  margin-bottom: 4px;
+}
+
+#times-table-select-grid .level-name {
+  font-size: var(--fs-md);
+  margin-bottom: 2px;
+}
+
+#times-table-select-grid .level-highscore {
+  font-size: 0.8rem;
+}
+
+@media (min-width: 600px) {
+  #times-table-select-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
 /* =============================================
    게임 화면 (#game-screen)
    ============================================= */
@@ -732,7 +773,7 @@ body {
 /* 피드백 메시지 */
 #feedback-message {
   position: absolute;
-  top: 25%;
+  top: 15%;
   left: 50%;
   transform: translateX(-50%);
   padding: 12px 28px;
@@ -740,7 +781,7 @@ body {
   font-size: var(--fs-md);
   font-weight: 900;
   white-space: nowrap;
-  z-index: 20;
+  z-index: 200;
   display: none;
   box-shadow: 0 4px 16px var(--shadow);
 }
@@ -944,7 +985,7 @@ body {
 }
 
 .fw-text {
-  font-size: clamp(0.95rem, 2.5vw, 1.3rem);
+  font-size: clamp(1.9rem, 5vw, 2.6rem);
   font-weight: 900;
   color: var(--text-dark);
   white-space: nowrap;
@@ -1132,6 +1173,11 @@ body {
 
   .level-grid {
     grid-template-columns: 1fr;
+    max-width: 320px;
+  }
+
+  #times-table-select-grid {
+    grid-template-columns: repeat(2, 1fr);
     max-width: 320px;
   }
 
